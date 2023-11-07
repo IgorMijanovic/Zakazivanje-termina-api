@@ -6,11 +6,17 @@ public abstract class ObradaTermina {
     private List<Termin> raspored;
     private List<Prostor> prostori;
 
+
     public abstract boolean dodajNoviTermin();
     public abstract boolean brisanjeTermina();
     public abstract boolean premestanjeTermina();
-    public abstract boolean pretragaTermina();
 
+    public abstract boolean dodavanjeProstorija();
+
+    public boolean pretragaTermina(){
+
+        return true;
+    }
 
     public List<Termin> getRaspored() {
         if(raspored == null) raspored = new ArrayList<>();
