@@ -34,12 +34,11 @@ public class Termin {
         this.dodaci = new HashMap<>();
     }
 
-    public Termin(Prostor prostor, LocalDateTime pocetak, LocalDateTime kraj, Map<String, String> dodaci, int period) {
+    public Termin(Prostor prostor, LocalDateTime pocetak, LocalDateTime kraj, Map<String, String> dodaci) {
         this.prostor = prostor;
         this.pocetak = pocetak;
         this.kraj = kraj;
-        this.period = period;
-        this.dodaci = new HashMap<>();
+        this.dodaci = dodaci;
     }
 
     public Prostor getProstor() {
@@ -92,6 +91,6 @@ public class Termin {
 
     @Override
     public String toString() {
-        return this.pocetak + " " + this.kraj;
+        return this.pocetak + " " + this.kraj + " " + dodaci;
     }
 }
