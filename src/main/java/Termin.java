@@ -89,4 +89,9 @@ public class Termin {
     public void setTipZakazivanja(PrvaDrugaImp tipZakazivanja) {
         this.tipZakazivanja = tipZakazivanja;
     }
+
+    @Override
+    public String toString() {
+        return this.pocetak + " " + this.kraj;
+    }
 }
