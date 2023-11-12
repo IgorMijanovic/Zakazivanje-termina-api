@@ -21,6 +21,7 @@ public class Termin {
      */
     private Map<String, String> dodaci;
     private int period;
+    private PrvaDrugaImp tipZakazivanja;
 
     public Termin() {
         this.dodaci = new HashMap<>();
@@ -39,5 +40,53 @@ public class Termin {
         this.kraj = kraj;
         this.period = period;
         this.dodaci = new HashMap<>();
+    }
+
+    public Prostor getProstor() {
+        return prostor;
+    }
+
+    public void setProstor(Prostor prostor) {
+        this.prostor = prostor;
+    }
+
+    public LocalDateTime getPocetak() {
+        return pocetak;
+    }
+
+    public void setPocetak(LocalDateTime pocetak) {
+        this.pocetak = pocetak;
+    }
+
+    public LocalDateTime getKraj() {
+        return kraj;
+    }
+
+    public void setKraj(LocalDateTime kraj) {
+        this.kraj = kraj;
+    }
+
+    public Map<String, String> getDodaci() {
+        return dodaci;
+    }
+
+    public void setDodaci(Map<String, String> dodaci) {
+        this.dodaci = dodaci;
+    }
+
+    public int getPeriod() {
+        return period;
+    }
+
+    public void setPeriod(int period) {
+        this.period = period;
+    }
+
+    public PrvaDrugaImp getTipZakazivanja() {
+        return tipZakazivanja;
+    }
+
+    public void setTipZakazivanja(PrvaDrugaImp tipZakazivanja) {
+        this.tipZakazivanja = tipZakazivanja;
     }
 }
