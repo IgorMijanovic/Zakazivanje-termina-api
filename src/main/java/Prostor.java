@@ -54,6 +54,6 @@ public class Prostor {
 
     @Override
     public String toString() {
-        return "ime sobe:" + this.ime + ",broj mesta:" + this.dodaci;
+        return "ime sobe:" + this.ime + ",broj mesta:" + this.dodaci + " ";
     }
 }
