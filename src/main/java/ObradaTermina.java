@@ -30,6 +30,7 @@ public abstract class ObradaTermina {
     }
 
     public List<Prostor> getProstori() {
+        if(prostori == null) prostori = new ArrayList<>();
         return prostori;
     }
 
