@@ -26,4 +26,12 @@ public abstract class ObradaTermina {
     public void setRaspored(List<Termin> terminiList) {
         this.raspored = terminiList;
     }
+
+    public List<Prostor> getProstori() {
+        return prostori;
+    }
+
+    public void setProstori(List<Prostor> prostori) {
+        this.prostori = prostori;
+    }
 }
