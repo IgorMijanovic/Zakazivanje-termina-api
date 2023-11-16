@@ -100,6 +100,31 @@ public abstract class ObradaTermina {
                 }
             }
         }
+        if (unos.get(0).matches("[tp]") && unos.get(1).contains(":") && args.length == 2){
+            System.out.println("pretraga za datum + dodatak");
+
+            String[] tokeni = unos.get(1).split(":");
+            String key = tokeni[0];
+            String value = tokeni[1];
+            if (unos.get(0).equals("t")){
+                for (Termin t : raspored) {
+                    if (t.getDodaci().containsKey(key)) {
+                        if (t.getDodaci().get(key).equals(value)) {
+                            System.out.println(t);
+                        }
+                    }
+                }
+            }else if(unos.get(0).equals("p")){
+                for (Prostor p : prostori){
+                    if (p.getDodaci().containsKey(key)) {
+                        if (p.getDodaci().get(key).equals(value)) {
+                            System.out.println(p);
+                        }
+                    }
+                }
+            }
+        }
+
 
         return true;
     }
