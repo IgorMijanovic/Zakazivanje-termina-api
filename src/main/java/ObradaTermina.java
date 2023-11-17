@@ -1,3 +1,8 @@
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
+
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,6 +21,22 @@ public abstract class ObradaTermina {
     public boolean pretragaTermina(String... args){
 
         return true;
+    }
+
+    public void sacuvaj(String tip,String putanja) throws IOException {
+
+        FileWriter fileWriter = new FileWriter("Desktop.csv");
+        CSVPrinter csvPrinter = new CSVPrinter(fileWriter, CSVFormat.DEFAULT);
+
+       //for (Termin termin : raspored){
+        //    csvPrinter.printRecord(termin.getPocetak(),termin.getKraj(),termin.getProstor(),termin.getDodaci());
+        //}
+        csvPrinter.printRecord("Aleksa","Nikolic");
+
+        csvPrinter.close();
+        fileWriter.close();
+
+
     }
 
     public List<Termin> getRaspored() {
