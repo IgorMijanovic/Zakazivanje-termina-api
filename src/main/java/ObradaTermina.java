@@ -25,21 +25,9 @@ public abstract class ObradaTermina {
         return true;
     }
 
-    public void sacuvaj(String tip,String putanja) throws IOException {
-
-        FileWriter fileWriter = new FileWriter("Desktop.csv");
-        CSVPrinter csvPrinter = new CSVPrinter(fileWriter, CSVFormat.DEFAULT);
-
-       //for (Termin termin : raspored){
-        //    csvPrinter.printRecord(termin.getPocetak(),termin.getKraj(),termin.getProstor(),termin.getDodaci());
-        //}
-        csvPrinter.printRecord("Aleksa","Nikolic");
-
-        csvPrinter.close();
-        fileWriter.close();
+    public void export(String... args){}
 
 
-    }
 
     public List<Termin> getRaspored() {
         if(raspored == null) raspored = new ArrayList<>();
