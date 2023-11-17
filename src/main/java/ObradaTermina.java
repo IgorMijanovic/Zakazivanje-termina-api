@@ -10,6 +10,8 @@ public abstract class ObradaTermina {
 
     private List<Termin> raspored;
     private List<Prostor> prostori;
+    private int pocetakRadnogVremena;
+    private int krajRadnogVremena;
 
 
     public abstract boolean dodajNoviTermin(String... args);
@@ -46,5 +48,30 @@ public abstract class ObradaTermina {
 
     public void setRaspored(List<Termin> terminiList) {
         this.raspored = terminiList;
+    }
+
+    public List<Prostor> getProstori() {
+        if(prostori == null) prostori = new ArrayList<>();
+        return prostori;
+    }
+
+    public void setProstori(List<Prostor> prostori) {
+        this.prostori = prostori;
+    }
+
+    public int getPocetakRadnogVremena() {
+        return pocetakRadnogVremena;
+    }
+
+    public void setPocetakRadnogVremena(int pocetakRadnogVremena) {
+        this.pocetakRadnogVremena = pocetakRadnogVremena;
+    }
+
+    public int getKrajRadnogVremena() {
+        return krajRadnogVremena;
+    }
+
+    public void setKrajRadnogVremena(int krajRadnogVremena) {
+        this.krajRadnogVremena = krajRadnogVremena;
     }
 }

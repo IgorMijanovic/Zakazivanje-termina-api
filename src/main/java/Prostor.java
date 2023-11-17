@@ -51,4 +51,9 @@ public class Prostor {
     public void setDodaci(Map<String, String> dodaci) {
         this.dodaci = dodaci;
     }
+
+    @Override
+    public String toString() {
+        return "ime sobe:" + this.ime + ",broj mesta:" + this.dodaci + " ";
+    }
 }
