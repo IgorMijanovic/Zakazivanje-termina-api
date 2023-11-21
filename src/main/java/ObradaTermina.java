@@ -33,6 +33,8 @@ import java.util.regex.Pattern;
 
 import static com.itextpdf.kernel.pdf.PdfName.Document;
 
+
+
 public abstract class ObradaTermina {
     /**
      * Lista raspoder predstavlja sve zakazane termine
