@@ -1,7 +1,35 @@
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.Cell;
+import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.element.Table;
+
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.csv.CSVRecord;
+
+
+import java.io.*;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static com.itextpdf.kernel.pdf.PdfName.Document;
 
 public abstract class ObradaTermina {
 
@@ -127,6 +155,367 @@ public abstract class ObradaTermina {
 
 
         return true;
+    }
+
+
+   public void exportJson(String... args){
+       List<String> unos = new ArrayList<>(Arrays.asList(args));
+       try {
+            String putanjaDoFajla = args[0];
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.registerModule(new JavaTimeModule());
+            objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+
+            if (args.length == 1) {
+                String jsonString = objectMapper.writeValueAsString(getRaspored());
+                Files.write(Paths.get(putanjaDoFajla), jsonString.getBytes(), StandardOpenOption.APPEND);
+            }else if (args.length == 3 && unos.get(1).contains(".") && unos.get(2).contains(".")) {
+                LocalDateTime pocetniDatum = datum(args[1]);
+                LocalDateTime krajniDatum = datum(args[2]);
+                List<Termin> zaIspis = new ArrayList<>();
+                for (LocalDateTime datumm = pocetniDatum; datumm.isBefore(krajniDatum); datumm = datumm.plusDays(1))
+                    for (Termin obj : getRaspored()) {
+                        if (datumm.getYear() == obj.getPocetak().getYear() && datumm.getMonth() == obj.getPocetak().getMonth() && datumm.getDayOfMonth() == obj.getPocetak().getDayOfMonth()){
+                            zaIspis.add(obj);
+                        }
+                    }
+                String jsonString = objectMapper.writeValueAsString(zaIspis);
+                Files.write(Paths.get(putanjaDoFajla), jsonString.getBytes(), StandardOpenOption.APPEND);
+            }else if (args.length == 2 && DaLiJeDan(unos.get(1)) != null) {
+                DayOfWeek dan = DaLiJeDan(unos.get(1));
+                List<Termin> zaIspis = new ArrayList<>();
+                for (Termin obj : getRaspored()){
+                    if (obj.getPocetak().getDayOfWeek() == dan){
+                        zaIspis.add(obj);
+                    }
+                }
+                String jsonString = objectMapper.writeValueAsString(zaIspis);
+                Files.write(Paths.get(putanjaDoFajla), jsonString.getBytes(), StandardOpenOption.APPEND);
+            }
+            int flag = 0;
+           List<Termin> zaIspis3 = new ArrayList<>();
+           for (String s : unos) {
+               if (daLiJeUDodacima(s) != null) {
+                   List<Termin> zaIspis2 = daLiJeUDodacima(s);
+                   zaIspis3.addAll(zaIspis2);
+                   flag = 1;
+               }
+           }
+           if (flag == 1){
+               String jsonString = objectMapper.writeValueAsString(zaIspis3);
+               Files.write(Paths.get(putanjaDoFajla), jsonString.getBytes(), StandardOpenOption.APPEND);
+           }
+
+           int flag2 = 0;
+           List<Termin> zaIspis4 = new ArrayList<>();
+           for (String s : unos){
+               for (Termin obj : getRaspored()){
+                   if (obj.getProstor().getIme().equals(s)){
+                       zaIspis4.add(obj);
+                       flag2 = 1;
+                   }
+               }
+           }
+           if (flag2 == 1){
+               String jsonString = objectMapper.writeValueAsString(zaIspis4);
+               Files.write(Paths.get(putanjaDoFajla), jsonString.getBytes(), StandardOpenOption.APPEND);
+           }
+
+       } catch (IOException e) {
+           throw new RuntimeException(e);
+       }
+   }
+
+
+
+    public void exportPDF(String... args){
+      File file = new File(args[0]);
+        List<String> unos = new ArrayList<>(Arrays.asList(args));
+        try {
+            PdfWriter writer = new PdfWriter(file);
+            PdfDocument pdf = new PdfDocument(writer);
+            Document document = new Document(pdf);
+
+            Table table = new Table(5);
+            if (args.length == 1){
+                for (Termin t : getRaspored()){
+                    table.addCell(new Cell().add(new Paragraph(t.getProstor().getIme())));
+                    table.addCell(new Cell().add(new Paragraph(t.getPocetak().toString())));
+                    table.addCell(new Cell().add(new Paragraph(t.getKraj().toString())));
+                    table.addCell(new Cell().add(new Paragraph(t.getDodaci().toString())));
+                    table.addCell(new Cell().add(new Paragraph(t.getTipZakazivanja().toString())));
+                }
+            }else if (args.length == 3 && unos.get(1).contains(".") && unos.get(2).contains(".")) {
+                LocalDateTime pocetniDatum = datum(args[1]);
+                LocalDateTime krajniDatum = datum(args[2]);
+                for (LocalDateTime datumm = pocetniDatum; datumm.isBefore(krajniDatum); datumm = datumm.plusDays(1))
+                    for (Termin obj : getRaspored()) {
+                        if (datumm.getYear() == obj.getPocetak().getYear() && datumm.getMonth() == obj.getPocetak().getMonth() && datumm.getDayOfMonth() == obj.getPocetak().getDayOfMonth()){
+
+                                table.addCell(new Cell().add(new Paragraph(obj.getProstor().getIme())));
+                                table.addCell(new Cell().add(new Paragraph(obj.getPocetak().toString())));
+                                table.addCell(new Cell().add(new Paragraph(obj.getKraj().toString())));
+                                table.addCell(new Cell().add(new Paragraph(obj.getDodaci().toString())));
+                                table.addCell(new Cell().add(new Paragraph(obj.getTipZakazivanja().toString())));
+
+                        }
+                    }
+            }else if (args.length == 2 && DaLiJeDan(unos.get(1)) != null) {
+                DayOfWeek dan = DaLiJeDan(unos.get(1));
+                for (Termin obj : getRaspored()){
+                    if (obj.getPocetak().getDayOfWeek() == dan){
+                        table.addCell(new Cell().add(new Paragraph(obj.getProstor().getIme())));
+                        table.addCell(new Cell().add(new Paragraph(obj.getPocetak().toString())));
+                        table.addCell(new Cell().add(new Paragraph(obj.getKraj().toString())));
+                        table.addCell(new Cell().add(new Paragraph(obj.getDodaci().toString())));
+                        table.addCell(new Cell().add(new Paragraph(obj.getTipZakazivanja().toString())));
+                    }
+                }
+
+            }
+
+            for (String s : unos) {
+                if (daLiJeUDodacima(s) != null) {
+                    List<Termin> zaIspis = daLiJeUDodacima(s);
+                    for (Termin obj : zaIspis) {
+                        table.addCell(new Cell().add(new Paragraph(obj.getProstor().getIme())));
+                        table.addCell(new Cell().add(new Paragraph(obj.getPocetak().toString())));
+                        table.addCell(new Cell().add(new Paragraph(obj.getKraj().toString())));
+                        table.addCell(new Cell().add(new Paragraph(obj.getDodaci().toString())));
+                        table.addCell(new Cell().add(new Paragraph(obj.getTipZakazivanja().toString())));
+                    }
+
+                }
+            }
+
+            for (String s : unos){
+                for (Termin obj : getRaspored()){
+                    if (obj.getProstor().getIme().equals(s)){
+                        table.addCell(new Cell().add(new Paragraph(obj.getProstor().getIme())));
+                        table.addCell(new Cell().add(new Paragraph(obj.getPocetak().toString())));
+                        table.addCell(new Cell().add(new Paragraph(obj.getKraj().toString())));
+                        table.addCell(new Cell().add(new Paragraph(obj.getDodaci().toString())));
+                        table.addCell(new Cell().add(new Paragraph(obj.getTipZakazivanja().toString())));
+                    }
+                }
+
+            }
+
+            document.add(table);
+            document.close();
+            writer.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public void exportCSV(String... args){
+        List<String> unos = new ArrayList<>(Arrays.asList(args));
+
+        try (Writer writer = new FileWriter(args[0]);
+             CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT)) {
+
+            if (args.length == 1) {
+                for (Termin obj : getRaspored()) {
+                    csvPrinter.printRecord(obj.getProstor().getIme(), obj.getPocetak(), obj.getKraj(), obj.getDodaci(), obj.getTipZakazivanja());
+                }
+            } else if (args.length == 3 && unos.get(1).contains(".") && unos.get(2).contains(".")) {
+                LocalDateTime pocetniDatum = datum(args[1]);
+                LocalDateTime krajniDatum = datum(args[2]);
+                System.out.println(pocetniDatum);
+                System.out.println(krajniDatum);
+                for (LocalDateTime datumm = pocetniDatum; datumm.isBefore(krajniDatum); datumm = datumm.plusDays(1))
+                for (Termin obj : getRaspored()) {
+                    if (datumm.getYear() == obj.getPocetak().getYear() && datumm.getMonth() == obj.getPocetak().getMonth() && datumm.getDayOfMonth() == obj.getPocetak().getDayOfMonth()){
+                        csvPrinter.printRecord(obj.getProstor().getIme(), obj.getPocetak(), obj.getKraj(), obj.getDodaci(), obj.getTipZakazivanja());
+                        System.out.println("ispisan");
+                }
+                }
+            } else if (args.length == 2 && DaLiJeDan(unos.get(1)) != null) {
+                DayOfWeek dan = DaLiJeDan(unos.get(1));
+                for (Termin obj : getRaspored()){
+                    if (obj.getPocetak().getDayOfWeek() == dan){
+                        csvPrinter.printRecord(obj.getProstor().getIme(), obj.getPocetak(), obj.getKraj(), obj.getDodaci(), obj.getTipZakazivanja());
+                    }
+                }
+
+            }
+
+            for (String s : unos) {
+                if (daLiJeUDodacima(s) != null) {
+                    List<Termin> zaIspis = daLiJeUDodacima(s);
+                    for (Termin obj : zaIspis) {
+                        csvPrinter.printRecord(obj.getProstor().getIme(), obj.getPocetak(), obj.getKraj(), obj.getDodaci(), obj.getTipZakazivanja());
+                    }
+
+                }
+            }
+
+            for (String s : unos){
+                for (Termin obj : getRaspored()){
+                    if (obj.getProstor().getIme().equals(s)){
+                            csvPrinter.printRecord(obj.getProstor().getIme(), obj.getPocetak(), obj.getKraj(), obj.getDodaci(), obj.getTipZakazivanja());
+                    }
+                }
+
+            }
+
+
+            csvPrinter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void importovanjeJson(String putanja){
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        try {
+            String jsonContent = Files.readString(new File(putanja).toPath());
+            List<Termin> zaDodavanje = objectMapper.readValue(jsonContent, new TypeReference<List<Termin>>() {});
+            getRaspored().addAll(zaDodavanje);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+
+    public void importovanjeCSV(String putanja){
+       try {
+           Reader reader = new FileReader(putanja);
+           CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT);
+
+           for (CSVRecord csvRecord : csvParser){
+               String imeSobe = csvRecord.get(0);
+               Termin t = new Termin();
+               t.setProstor(nadjiSobu(imeSobe));
+
+               DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
+
+               LocalDateTime pocetak = LocalDateTime.parse(csvRecord.get(1),formatter);
+               LocalDateTime kraj = LocalDateTime.parse(csvRecord.get(2),formatter);
+               t.setPocetak(pocetak);
+               t.setKraj(kraj);
+
+               String dodaci = csvRecord.get(3);
+
+               Pattern pattern = Pattern.compile("\\b(\\w+)=(\\w+(?:\\s+\\w+)?)\\b");
+               Matcher matcher = pattern.matcher(dodaci);
+               Map<String,String> dodadaciZaSet = new HashMap<>();
+
+               while (matcher.find()){
+                   String kljuc = matcher.group(1);
+                   String vrednost = matcher.group(2);
+
+                   dodadaciZaSet.put(kljuc,vrednost);
+               }
+               t.setDodaci(dodadaciZaSet);
+               //System.out.println(csvRecord.get(4));
+               if (csvRecord.get(4).equals("DRIGA_IMP")){
+                   t.setTipZakazivanja(PrvaDrugaImp.DRIGA_IMP);
+                   System.out.println("drugaaaaaaaaa");
+               } else if (csvRecord.get(4).equals("PRVA_IMP")) {
+                   t.setTipZakazivanja(PrvaDrugaImp.PRVA_IMP);
+               }
+
+               getRaspored().add(t);
+           }
+
+
+
+
+       }catch (IOException e){
+
+       }
+    }
+
+    private Prostor nadjiSobu(String ime){
+        for (Prostor p : getProstori()){
+            if (p.getIme() == ime){
+                return p;
+            }
+        }
+        return null;
+    }
+
+    private DayOfWeek DaLiJeDan(String dan){
+        List<String> daniUNedelji = new ArrayList<>();
+        daniUNedelji.add("ponedeljak");
+        daniUNedelji.add("utorak");
+        daniUNedelji.add("sreda");
+        daniUNedelji.add("cetvrtak");
+        daniUNedelji.add("petak");
+        daniUNedelji.add("subota");
+        daniUNedelji.add("nedelja");
+
+        DayOfWeek danEng = null;
+        if (daniUNedelji.contains(dan)){
+            switch (dan){
+                case "ponedeljak":
+                    danEng = DayOfWeek.MONDAY;
+                    break;
+                case "utorak":
+                    danEng = DayOfWeek.TUESDAY;
+                    break;
+                case "sreda":
+                    danEng = DayOfWeek.WEDNESDAY;
+                    break;
+                case "cetvrtak":
+                    danEng = DayOfWeek.THURSDAY;
+                    break;
+                case "petak":
+                    danEng = DayOfWeek.FRIDAY;
+                    break;
+                case "subota":
+                    danEng = DayOfWeek.SATURDAY;
+                    break;
+                case "nedelja":
+                    danEng = DayOfWeek.SUNDAY;
+                    break;
+            }
+            return danEng;
+        }else {
+            return null;
+        }
+    }
+
+    private List<Termin> daLiJeUDodacima(String tekst){
+        if (!tekst.contains(":")){
+            return null;
+        }
+        String kljuc = tekst.split(":")[0];
+        String vrednost = tekst.split(":")[1];
+
+        List<Termin> imaju = new ArrayList<>();
+
+        for (Termin t : getRaspored()){
+            if (t.getDodaci().containsKey(kljuc) && t.getDodaci().containsValue(vrednost)){
+                imaju.add(t);
+            }
+        }
+        if (imaju.isEmpty()){
+            return null;
+        }else {
+            return imaju;
+        }
+
+
+
+    }
+    private LocalDateTime datum(String datumm){
+        int dan,mesec,godina;
+
+        dan = Integer.parseInt(String.valueOf(datumm.charAt(0)))*10 + Integer.parseInt(String.valueOf(datumm.charAt(1)));
+
+        mesec = Integer.parseInt(String.valueOf(datumm.charAt(3)))*10 + Integer.parseInt(String.valueOf(datumm.charAt(4)));
+
+        godina = Integer.parseInt(String.valueOf(datumm.charAt(6)))*1000 + Integer.parseInt(String.valueOf(datumm.charAt(7)))*100 + Integer.parseInt(String.valueOf(datumm.charAt(8)))*10 + Integer.parseInt(String.valueOf(datumm.charAt(9)));
+
+        LocalDateTime vrati = LocalDateTime.of(godina,mesec,dan,0,0);
+
+        return vrati;
+
     }
 
     public List<Termin> getRaspored() {
