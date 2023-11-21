@@ -1,0 +1,11 @@
+PROSTOR
+s1-30-racunari:da-projektor:da-grafickatabla:da
+s2-20-racunari:da-projektor:da-grafickatabla:ne
+s3-60-racunari:ne-projektor:da-grafickatabla:da
+s4-40-racunari:ne-projektor:da-grafickatabla:ne
+s5-15-racunari:da-projektor:da-grafickatabla:da
+RADNOVREME
+8-20
+NERADNIDANI
+31.12.2023
+22.12.2023
