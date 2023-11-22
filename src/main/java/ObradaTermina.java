@@ -36,6 +36,11 @@ import static com.itextpdf.kernel.pdf.PdfName.Document;
 
 
 public abstract class ObradaTermina {
+
+    private static ObradaTermina obj;
+
+
+
     /**
      * Lista raspoder predstavlja sve zakazane termine
      */
@@ -97,9 +102,12 @@ public abstract class ObradaTermina {
      */
     public abstract boolean premestanjeTermina(String... args);
 
+
+
     /**
      * kreira raspored i uctiava sobe
      */
+
     public void initRaspored(){
         raspored = new ArrayList<>();
         prostori = new ArrayList<>();
@@ -192,6 +200,8 @@ public abstract class ObradaTermina {
      * @param args
      * @return
      */
+
+    //samo dodajem na string slobodno do pocetak termini, slobodno od kraja termina
     public boolean pretragaTermina(String... args){
         List<String> unos = new ArrayList<>(Arrays.asList(args));
         if(unos.get(0).contains(".") && args.length == 1){
@@ -705,5 +715,14 @@ public abstract class ObradaTermina {
 
     public void setNeradniDani(List<LocalDateTime> neradniDani) {
         this.neradniDani = neradniDani;
+    }
+
+    public static ObradaTermina getObj() {
+//        System.out.println(obj);
+        return obj;
+    }
+
+    public static void setObj(ObradaTermina newObj) {
+        obj = newObj;
     }
 }
