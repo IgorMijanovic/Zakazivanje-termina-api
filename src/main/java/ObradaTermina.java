@@ -313,9 +313,24 @@ public abstract class ObradaTermina {
         return true;
     }
 
+    public void napraviFajl(String putanja){
+        File file = new File(putanja);
+
+        try {
+            if (file.createNewFile()) {
+                System.out.println("Fajl je uspešno kreiran.");
+            } else {
+                System.out.println("Fajl već postoji.");
+            }
+        } catch (IOException e) {
+            System.err.println("Došlo je do greške prilikom kreiranja fajla: " + e.getMessage());
+        }
+    }
+
 
    public void exportJson(String... args){
        List<String> unos = new ArrayList<>(Arrays.asList(args));
+       napraviFajl(args[0]);
        try {
             String putanjaDoFajla = args[0];
             ObjectMapper objectMapper = new ObjectMapper();
